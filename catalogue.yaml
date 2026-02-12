@@ -44,13 +44,19 @@
       dest: /etc/systemd/system/catalogue.service
 
   - name: copy mongo repo
+    ansible.builtin.copy:
+      src: mongo.repo
+      dest: /etc/yum.repos.d/mongo.repo
+
+  - name: install mongodb client
     ansible.builtin.dnf:
       name: mongodb-mongosh
       state: present
 
+
   - name: load the products
     ansible.builtin.shell: mongosh --host "{{ MONGODB_HOST }}" </app/db/master-data.js
-    when: catalogue_output.stdout | int < 0
+    
 
   - name: start catalogue
     ansible.builtin.service:
