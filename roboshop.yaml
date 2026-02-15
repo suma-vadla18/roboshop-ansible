@@ -1,6 +1,8 @@
-# ansible-playbook -i localhost,   -e '{"instances":["mongodb","catalogue","redis","user","cart","mysql","shipping","rabbitmq","payment","frontend"]}' roboshop.yaml
-# ansible-playbook -i localhost,   -e '{"instances":["mongodb","catalogue","redis","user","cart","mysql","shipping","rabbitmq","payment","frontend"]}'  -e action=destroy roboshop.yaml
-
+# TO CREATE: ansible-playbook -i localhost,   -e '{"instances":["mongodb","catalogue","redis","user","cart","mysql","shipping","rabbitmq","payment","frontend"]}' roboshop.yaml
+# TO DELETE: ansible-playbook -i localhost,   -e '{"instances":["mongodb","catalogue","redis","user","cart","mysql","shipping","rabbitmq","payment","frontend"]}'  -e action=destroy roboshop.yaml
+# or
+# ansible-playbook -i localhost, -e " instances = [ 'mongodb', 'catalogue', 'redis']" roboshop.yaml
+# ansible-playbook -i localhost, -e " instances = [ 'mongodb', 'catalogue', 'redis']" -e action=destroy roboshop.yaml
 - name: create ec2 and r53 records
   hosts: all
   connection: local
@@ -43,7 +45,7 @@
       type: A
       ttl: 1
       value: "{{ item.instances[0].private_ip_address }}"
-      wait: true
+      wait: true # we can give wait: false then it won't wait until DNS get reflected
     loop: "{{ ec2_output.results }}"
     when: action == "create"
 
@@ -55,7 +57,7 @@
       type: A
       ttl: 1
       value: "{{ item.instances[0].public_ip_address }}"
-      wait: true
+      wait: true # we can give wait: false then it won't wait until DNS get reflected
     loop: "{{ ec2_output.results }}"
     when:  # and
     - item.item == "frontend"
