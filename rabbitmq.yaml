@@ -19,7 +19,7 @@
       state: started
 
   - name: create rabbitmq user
-   ansible.builtin.rabbitmq_user:
+    community.builtin.rabbitmq_user:
       user: roboshop
       password: roboshop123
       permissions:
@@ -28,4 +28,4 @@
            read_priv: .*
            write_priv: .*
       state: present
-      
+
