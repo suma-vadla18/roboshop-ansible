@@ -1,71 +1,68 @@
-- name: configure paymnet server
-  hosts: paymnet
+- name: configure payment server
+  hosts: payment
   become: yes
   tasks:
   - name: install python
     ansible.builtin.dnf:
-       name: "{{ item }}"
-       state: present
-  loop:
-  - python3
-  - gcc 
-  - python3-devel
-- name: create sytem user roboshop
-  ansible.builtin.user:
-     name: roboshop
-     system: true
-     home: /app
-     shell: /sbin/nologin
-     comment: "Roboshop system user"
+      name: "{{ item }}"
+      state: present
+    loop:
+    - python3 
+    - gcc 
+    - python3-devel
 
-- name: delete app directory
-  ansible.builtin.file:
-     path: /app
-     state: absent
+  - name: create system user roboshop
+    ansible.builtin.user:
+      name: roboshop
+      system: true
+      home: /app
+      shell: /sbin/nologin
+      comment: "Roboshop system user"
+  
+  - name: delete app directory
+    ansible.builtin.file:
+      path: /app
+      state: absent
 
-- name: create app directory
-  ansible.builtin.file:
-    path: /app
-    state: directory
+  - name: create app directory
+    ansible.builtin.file:
+      path: /app
+      state: directory
 
-- name: delete shipping zip file
-  ansible.builtin.file:
-    path: /tmp/shipping.zip
-    state: absent
+  - name: delete payment zip file
+    ansible.builtin.file:
+      path: /tmp/payment.zip
+      state: absent
 
-- name: download zip file
-  ansible.builtin.get_url:
-     url: https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip 
-     dest: /tmp/shipping.zip
+  - name: download payment
+    ansible.builtin.get_url:
+      url: https://roboshop-artifacts.s3.amazonaws.com/payment-v3.zip 
+      dest: /tmp/payment.zip
 
-- name: unarchive shipping
-  ansible.builtin.unarchive:
-     src: /tmp/shipping.zip
-     dest: /app
-     remote_src: yes
-    
-- name: install dependencies
-  ansible.builtin.pip:
-     requirements: requirements.txt
-     executable: pip3.9
-  args:
-    chdir: /app
+  - name: unarchieve payment
+    ansible.builtin.unarchive:
+      src: /tmp/payment.zip
+      dest: /app
+      remote_src: yes
 
-- name: copy systemctl service
-  ansible.builtin.template:
-     src: payment.service
-     dest: /etc/systemd/system/payment.service
+  - name: install dependencie
+    ansible.builtin.pip:
+      requirements: requirements.txt
+      executable: pip3.9
+    args:
+      chdir: /app
 
-- name: daemon-reload
-  ansible.builtin.systemd_service:
-     daemon-reload: true
+  - name: copy payment service
+    ansible.builtin.template:
+      src: payment.service
+      dest: /etc/systemd/system/payment.service
 
-- name: start and enable shipping
-  ansible.builtin.service:
-     name: shipping
-     state: restarted
-     enabled: yes
+  - name: daemon reload
+    ansible.builtin.systemd_service:
+      daemon_reload: true
 
-
-
-
+  - name: start enable payment
+    ansible.builtin.service:
+      name: payment
+      state: restarted
+      enabled: yes
