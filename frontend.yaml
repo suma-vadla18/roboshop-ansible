@@ -38,8 +38,8 @@
 
   - name: copy nginx.conf file
     ansible.builtin.template: 
-      path: nginx.conf
-      state: /etc/nginx/nginx.conf
+      src: nginx.conf
+      dest: /etc/nginx/nginx.conf
       
   - name: start and enable nginx
     ansible.builtin.service:
