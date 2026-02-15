@@ -1,0 +1,71 @@
+- name: configure paymnet server
+  hosts: paymnet
+  become: yes
+  tasks:
+  - name: install python
+    ansible.builtin.dnf:
+       name: "{{ item }}"
+       state: present
+  loop:
+  - python3
+  - gcc 
+  - python3-devel
+- name: create sytem user roboshop
+  ansible.builtin.user:
+     name: roboshop
+     system: true
+     home: /app
+     shell: /sbin/nologin
+     comment: "Roboshop system user"
+
+- name: delete app directory
+  ansible.builtin.file:
+     path: /app
+     state: absent
+
+- name: create app directory
+  ansible.builtin.file:
+    path: /app
+    state: directory
+
+- name: delete shipping zip file
+  ansible.builtin.file:
+    path: /tmp/shipping.zip
+    state: absent
+
+- name: download zip file
+  ansible.builtin.get_url:
+     url: https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip 
+     dest: /tmp/shipping.zip
+
+- name: unarchive shipping
+  ansible.builtin.unarchive:
+     src: /tmp/shipping.zip
+     dest: /app
+     remote_src: yes
+    
+- name: install dependencies
+  ansible.builtin.pip:
+     requirements: requirements.txt
+     executable: pip3.9
+  args:
+    chdir: /app
+
+- name: copy systemctl service
+  ansible.builtin.template:
+     src: payment.service
+     dest: /etc/systemd/system/payment.service
+
+- name: daemon-reload
+  ansible.builtin.systemd_service:
+     daemon-reload: true
+
+- name: start and enable shipping
+  ansible.builtin.service:
+     name: shipping
+     state: restarted
+     enabled: yes
+
+
+
+
