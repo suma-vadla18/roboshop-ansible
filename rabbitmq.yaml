@@ -19,7 +19,7 @@
       state: started
 
   - name: create rabbitmq user
-    community.builtin.rabbitmq_user:
+    community.rabbitmq.rabbitmq_user:
       user: roboshop
       password: roboshop123
       permissions:
